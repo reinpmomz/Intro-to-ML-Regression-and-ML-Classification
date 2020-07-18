@@ -10,7 +10,7 @@ The data was obtained from https://www.fueleconomy.gov/feg/download.shtml and co
 
 What do the variables in the data represent?
 
-- make
+- *make*
 
 - model
 
