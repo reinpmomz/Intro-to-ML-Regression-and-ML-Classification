@@ -38,6 +38,19 @@ What do the variables in the data represent?
 
 - startStop, start-stop technology Y or N
 
+### Simple Linear Regression
+
+In simple linear regression, we are aiming to find a linear relationship between one outcome variable and a single predictor variable:
+
+y=α+βx
+
+There are many potential techniques for finding the model coefficients. We will be starting with Ordinary Least Squares (OLS).
+
+We can use the lm function to fit an OLS model. lm requires two inputs:
+
+a formula specifying the output variable and the predictors you intend to use
+
+a dataframe containing the variables in the formula
 
 
 

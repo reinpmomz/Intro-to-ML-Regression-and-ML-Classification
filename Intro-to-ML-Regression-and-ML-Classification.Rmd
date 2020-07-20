@@ -1,0 +1,394 @@
+---
+title: "Intro-to-ML-Regression-and-ML-Classification"
+author: "Reinp"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: 
+    keep_md: yes
+  word_document: default
+---
+
+# R Programming: Linear Regression (OLS)
+
+## Set Chunk requirements
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+#echo=FALSE indicates that the code will not be shown in the final document 
+#(though any results/output would still be displayed).
+#include=FALSE to have the chunk evaluated, but neither the code nor its output displayed
+# warning=FALSE and message=FALSE suppress any R warnings or messages from being included 
+#in the final document
+```
+
+## Load Relevant Packages and Data Set
+
+```{r}
+setwd('E:/Documents/Reinp/GitHub Respositories/Intro-to-ML-Regression-and-ML-Classification')
+
+library(stats)
+library(psych)
+library(tidyverse)
+## tidyverse includes readr, ggplot2, dplyr, forcats, tibble, tidyr, purrr, stringr
+
+cars20_tr <- read_csv("data/cars20_train.csv")
+
+view(cars20_tr)
+
+```
+
+## Exploratory Data Analysis
+
+### Exploratory plots in base R 
+
+```{r}
+
+### Histogram of all MPGs
+
+hist(cars20_tr$mpg, breaks = 30)
+
+### Scatter plot of mpg vs disp 
+
+plot(mpg~disp, data = cars20_tr)
+
+
+### Box plots mpg vs transmission 
+boxplot(mpg~transmission, data = cars20_tr)
+
+
+```
+
+### Exploratory plots in ggplot2
+
+```{r}
+### What is the distribution of mpg?
+
+mpg_hist <- ggplot(data = cars20_tr, 
+       mapping = aes(
+         x = mpg
+       ) ) + geom_histogram(fill = "lightblue", colour = "black") +
+  theme_bw()
+
+mpg_hist
+
+### What is the relationship between displacement and mpg?
+
+displ_mpg_Scattplt <- ggplot(data = cars20_tr,
+       mapping = aes(
+         x = disp,
+         y = mpg
+       )) + geom_point(alpha = 0.3) + 
+  geom_smooth()
+
+displ_mpg_Scattplt
+
+### What is the relationship between transmission type and mpg?
+
+trans_mpg_boxplt <- ggplot(data = cars20_tr,
+       aes(x = transmission, 
+           y = mpg)) + 
+  geom_boxplot() + theme_minimal()
+
+trans_mpg_boxplt
+```
+
+## Simple Linear Regression
+
+```{r}
+## Simple 1 variable model using displacement to predict mpg
+
+
+model1 <- lm(mpg~disp, data = cars20_tr)
+
+summary(model1)
+
+## To get the model predicted values, use the predict function. 
+## It will output a vector of values: one for each car in the training data.
+
+cars20_tr$predictmodel1 <- predict(model1, newdata = cars20_tr)
+
+predict(model1, newdata = cars20_tr, interval = "confidence")
+
+cars20_tr$residualmodel1 <- cars20_tr$predictmodel1 - cars20_tr$mpg
+
+
+cars20_tr <- cars20_tr %>% mutate(model1 = predict(model1, newdata = cars20_tr),
+                                            residual1 = model1 - mpg)
+
+```
+### assess the model fit
+
+```{r}
+
+#plot(model1) ### shows several diagnostic graphs
+
+plot(model1, 1)
+plot(model1, 2)
+plot(model1, 3)  
+plot(model1, 4)  
+plot(model1, 5)  
+plot(model1, 6)
+
+### Showing the fitted model vs the actual mpg values
+
+ggplot(data = cars20_tr, 
+       mapping = aes(
+        x = mpg,
+        y = predictmodel1
+       )
+) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, colour = "red") + 
+  xlim(c(0,60)) + ylim(c(0,60))
+
+### Showing the residual vs the actual mpg values
+
+ggplot(
+  data = cars20_tr,
+  mapping = aes(
+    x = mpg,
+    y = residualmodel1
+  )
+) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "red")
+```
+
+### Testing on the query set
+
+```{r}
+cars20_qu <- read_csv("data/cars20_query.csv")
+view(cars20_qu)
+
+cars20_qu$predictmodel1 <- predict(model1, newdata = cars20_qu)
+cars20_qu$residualmodel1 <- cars20_qu$predictmodel1 - cars20_qu$mpg
+
+
+ggplot(data = cars20_qu, 
+       mapping = aes(
+        x = mpg,
+        y = predictmodel1
+       )
+) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, colour = "blue") + 
+  xlim(c(0,60)) + ylim(c(0,60))
+
+
+ggplot(
+  data = cars20_qu,
+  mapping = aes(
+    x = mpg,
+    y = residualmodel1
+  )
+) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed",  colour = "blue")
+
+```
+
+## Multiple linear regression
+
+```{r}
+model2 <- lm(mpg~disp+transmission+drive+atvType, data = cars20_tr) 
+model2
+
+summary(model2)
+
+cars20_tr$model2 <- predict(model2, newdata = cars20_tr)
+
+cars20_tr$residual2 <- cars20_tr$model2 - cars20_tr$mpg
+```
+### assess the model fit
+
+```{r}
+plot(model2)
+
+
+ggplot(data = cars20_tr, 
+       mapping = aes(
+        x = mpg,
+        y = model2
+       )
+) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, colour = "green") + 
+  xlim(c(0,60)) + ylim(c(0,60))
+
+
+ggplot(
+  data = cars20_tr,
+  mapping = aes(
+    x = mpg,
+    y = residual2
+  )
+) + 
+  geom_point() + geom_hline(yintercept = 0, linetype = "dashed", colour = "green")
+```
+
+# R Programming: Regression (Decision Trees)
+
+## Making a model with two variables
+
+### Training data
+
+```{r}
+library(rpart) ### for decision tree 
+library(rpart.plot) ## for showing decision tree
+
+cars20_trdt <- read_csv("data/cars20_train.csv")
+view(cars20_trdt)
+
+dt1 <- rpart(mpg~disp+transmission, data = cars20_trdt)
+dt1
+
+rpart.plot(dt1)
+
+cars20_trdt$predict1 <- predict(dt1, newdata = cars20_trdt)
+cars20_trdt$residual1 <- cars20_trdt$predict1 - cars20_trdt$mpg
+
+## Comparing model values to actual values
+
+ggplot(data = cars20_trdt,
+       aes(x = mpg,
+           y = predict1)) + 
+  geom_point(shape = 21) + 
+  xlim(c(0,60)) + 
+  ylim(c(0,60)) + 
+  geom_abline(slope = 1, intercept = 0, colour = "orange") + theme_bw() + 
+  ggtitle("Predict Training set")
+
+## Comparing residual values to actual values
+
+ggplot(data = cars20_trdt,
+  aes(x = mpg,
+    y = residual1)) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "orange") +
+  ggtitle("Residual Training set")
+```
+
+### Query data
+
+```{r}
+cars20_qudt <- read_csv("data/cars20_query.csv")
+view(cars20_qudt)
+
+cars20_qudt$predict1 <- predict(dt1, newdata = cars20_qudt)
+cars20_qudt$residual1 <- cars20_qudt$predict1 - cars20_qudt$mpg
+
+
+ggplot(data = cars20_qudt,
+       aes(x = mpg,
+           y = predict1)) + 
+  geom_point(shape = 21) + theme_bw() + 
+  xlim(c(0,60)) + ylim(c(0,60)) + 
+  geom_abline(slope = 1, intercept = 0) +
+  ggtitle("Predict Query set")
+
+
+ggplot(data = cars20_qudt,
+  aes(x = mpg,
+    y = residual1)) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  ggtitle("Residual Query set")
+```
+
+## Making a model with all available 
+
+### Training data
+
+```{r}
+## create a data set without the make and model variables using dplyr::select
+
+cars20_trdt2 <- read_csv("data/cars20_train.csv") %>%
+  select(-make, -model)
+view(cars20_trdt2)
+
+
+dt2 <- rpart(mpg~., data = cars20_trdt2)
+rpart.plot(dt2)
+
+
+cars20_trdt2$predict1 <- predict(dt2, newdata = cars20_trdt2)
+cars20_trdt2$residual1 <- cars20_trdt2$predict1 - cars20_trdt2$mpg
+
+ggplot(data = cars20_trdt2,
+       aes(x = mpg,
+           y = predict1)) + 
+  geom_point() + 
+  xlim(c(0,60)) + 
+  ylim(c(0,60)) + 
+  geom_abline(slope = 1, intercept = 0, colour = "purple") + theme_bw() + 
+  ggtitle("Predict Training set")
+
+
+
+ggplot(data = cars20_trdt2,
+  aes(x = mpg,
+    y = residual1)) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "purple") +
+  ggtitle("Residual Training set")
+
+```
+
+### Query data
+
+```{r}
+
+cars20_qudt2 <- read_csv("data/cars20_query.csv")
+
+cars20_qudt2 <- subset(cars20_qudt2, select = -c(make,model)) #Delete columns by name
+
+cars20_qudt2 <- cars20_qudt2[ !(cars20_qudt2$class == "Passenger Van"), ]
+view(cars20_qudt2)
+
+### Query data has a factor (class) with new level (Passenger Van) not in train data
+#1. delete the Passenger Van rows from query data set and model will run perfectly
+
+#2. You could try updating dt2$xlevels[["class"]] in the model object
+# dt2$xlevels[["class"]] <- union(dt2$xlevels[["class"]], levels(cars20_qudt2$class))
+
+#3. exclude (but not remove) "class" from the training data
+#dt2 <- rpart(mpg~., data=cars20_trdt2[,!colnames(cars20_trdt2) %in% c("class")])
+
+
+cars20_qudt2$predict1 <- predict(dt2, newdata = cars20_qudt2)
+cars20_qudt2$residual1 <- cars20_qudt2$predict1 - cars20_qudt2$mpg
+
+
+ggplot(data = cars20_qudt2,
+       aes(x = mpg,
+           y = predict1)) + 
+  geom_point() + 
+  xlim(c(0,60)) + 
+  ylim(c(0,60)) + 
+  geom_abline(slope = 1, intercept = 0, colour = "brown") + theme_bw() + 
+  ggtitle("Predict Training set")
+
+
+
+ggplot(data = cars20_qudt2,
+  aes(x = mpg,
+    y = residual1)) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "brown") +
+  ggtitle("Residual Training set")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
