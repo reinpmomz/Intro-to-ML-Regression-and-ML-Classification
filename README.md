@@ -52,6 +52,32 @@ a formula specifying the output variable and the predictors you intend to use
 
 a dataframe containing the variables in the formula
 
+### Multiple linear regression
 
+In multiple linear regression, we are attempting to formulate a linear model using more than 1 predictor.
+
+For a case of n variables, we are looking for a model of the form:
+
+y=α+β1x1+β2x2…+βnxn
+
+As in the case of simple linear regression, there is an intercept term. However there are now coefficients for each predictor in the model.
+
+## Regression (Decision Trees)
+
+Decision trees work by using the following general framework:
+
+- splitting the training data into smaller and smaller groups based on cutoff values of chosen input variables
+
+- Each split of the data creates what is called a node of the tree
+
+- the process is stopped when some previously-stated stopping criterion/criteria, Some possible stopping conditions:
+
+ -- the three should be no more than 3 levels deep
+
+ -- No node containing < 5% of the data can be split further
+
+- model values can then be predicted by taking a representative value (typically the mean) of the training subjects in the same node as the subject we are predicting for
+
+There are many different techniques for choosing the variables to branch on. We will be using the CART method as implemented in the rpart package. The algorithm used by rpart adheres very closely to the method as described in Breiman et. al (1984).
 
 
