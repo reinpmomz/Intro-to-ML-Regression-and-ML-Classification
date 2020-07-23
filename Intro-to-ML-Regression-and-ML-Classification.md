@@ -1,7 +1,7 @@
 ---
 title: "Intro-to-ML-Regression-and-ML-Classification"
 author: "Reinp"
-date: "2020-07-20"
+date: "2020-07-23"
 output:
   html_document: 
     keep_md: yes
@@ -1075,6 +1075,44 @@ ggplot(
 
 ![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-8-6.png)<!-- -->
 
+### Testing on the query set
+
+
+```r
+cars20_qu$predictmodel2 <- predict(model2, newdata = cars20_qu)
+cars20_qu$residualmodel2 <- cars20_qu$predictmodel2 - cars20_qu$mpg
+
+
+ggplot(data = cars20_qu, 
+       mapping = aes(
+        x = mpg,
+        y = predictmodel2
+       )
+) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, colour = "yellow") + 
+  xlim(c(0,60)) + ylim(c(0,60))
+```
+
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
+ggplot(
+  data = cars20_qu,
+  mapping = aes(
+    x = mpg,
+    y = residualmodel2
+  )
+) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed",  colour = "yellow")
+```
+
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-9-2.png)<!-- -->
+
+
+
+
 # R Programming: Regression (Decision Trees)
 
 ## Making a model with two variables
@@ -1116,7 +1154,7 @@ dt1
 rpart.plot(dt1)
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 ```r
 cars20_trdt$predict1 <- predict(dt1, newdata = cars20_trdt)
@@ -1134,7 +1172,7 @@ ggplot(data = cars20_trdt,
   ggtitle("Predict Training set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-9-2.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
 
 ```r
 ## Comparing residual values to actual values
@@ -1147,7 +1185,7 @@ ggplot(data = cars20_trdt,
   ggtitle("Residual Training set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-9-3.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-10-3.png)<!-- -->
 
 ### Query data
 
@@ -1169,7 +1207,7 @@ ggplot(data = cars20_qudt,
   ggtitle("Predict Query set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ```r
 ggplot(data = cars20_qudt,
@@ -1180,7 +1218,7 @@ ggplot(data = cars20_qudt,
   ggtitle("Residual Query set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-11-2.png)<!-- -->
 
 ## Making a model with all available 
 
@@ -1199,7 +1237,7 @@ dt2 <- rpart(mpg~., data = cars20_trdt2)
 rpart.plot(dt2)
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 ```r
 cars20_trdt2$predict1 <- predict(dt2, newdata = cars20_trdt2)
@@ -1215,7 +1253,7 @@ ggplot(data = cars20_trdt2,
   ggtitle("Predict Training set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-11-2.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-12-2.png)<!-- -->
 
 ```r
 ggplot(data = cars20_trdt2,
@@ -1226,7 +1264,7 @@ ggplot(data = cars20_trdt2,
   ggtitle("Residual Training set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-11-3.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-12-3.png)<!-- -->
 
 ### Query data
 
@@ -1263,7 +1301,7 @@ ggplot(data = cars20_qudt2,
   ggtitle("Predict Training set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 ```r
 ggplot(data = cars20_qudt2,
@@ -1274,7 +1312,7 @@ ggplot(data = cars20_qudt2,
   ggtitle("Residual Training set")
 ```
 
-![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-12-2.png)<!-- -->
+![](Intro-to-ML-Regression-and-ML-Classification_files/figure-html/unnamed-chunk-13-2.png)<!-- -->
 
 
 

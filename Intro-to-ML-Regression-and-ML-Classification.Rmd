@@ -227,6 +227,40 @@ ggplot(
   geom_point() + geom_hline(yintercept = 0, linetype = "dashed", colour = "green")
 ```
 
+### Testing on the query set
+
+```{r}
+
+cars20_qu$predictmodel2 <- predict(model2, newdata = cars20_qu)
+cars20_qu$residualmodel2 <- cars20_qu$predictmodel2 - cars20_qu$mpg
+
+
+ggplot(data = cars20_qu, 
+       mapping = aes(
+        x = mpg,
+        y = predictmodel2
+       )
+) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, colour = "yellow") + 
+  xlim(c(0,60)) + ylim(c(0,60))
+
+
+ggplot(
+  data = cars20_qu,
+  mapping = aes(
+    x = mpg,
+    y = residualmodel2
+  )
+) + 
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed",  colour = "yellow")
+
+```
+
+
+
+
 # R Programming: Regression (Decision Trees)
 
 ## Making a model with two variables
