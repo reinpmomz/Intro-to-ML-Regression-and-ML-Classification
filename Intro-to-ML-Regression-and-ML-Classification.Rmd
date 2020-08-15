@@ -108,7 +108,7 @@ summary(model1)
 
 cars20_tr$predictmodel1 <- predict(model1, newdata = cars20_tr)
 
-predict(model1, newdata = cars20_tr, interval = "confidence")
+# predict(model1, newdata = cars20_tr, interval = "confidence")
 
 cars20_tr$residualmodel1 <- cars20_tr$predictmodel1 - cars20_tr$mpg
 
@@ -414,11 +414,257 @@ ggplot(data = cars20_qudt2,
 
 ```
 
+# R Programming: Classification
+
+## Load Data Set
+
+```{r}
+stackoverflow <- read_csv("data2/stackoverflow.csv")
+
+view(stackoverflow)
+
+# Print stackoverflow
+glimpse(stackoverflow)
+
+str(stackoverflow)
+
+```
+
+## Exploring the Stack Overflow Survey
+
+```{r}
+count(stackoverflow, Remote, sort = TRUE)
+
+count(stackoverflow, Country, sort = TRUE)
+
+#Dolar sign Syntax
+table(stackoverflow$Remote)
+table(stackoverflow$Country)
 
 
+ggplot(stackoverflow, 
+       aes(x = Remote, y = YearsCodedJob)) +
+    geom_boxplot() +
+    labs(x = NULL,
+         y = "Years of professional coding experience")
 
 
+ggplot(stackoverflow, 
+       aes(x = Remote, y = Salary)) +
+    geom_boxplot() +
+    labs(x = NULL,
+         y = "Salary")
 
+
+ggplot(stackoverflow, 
+       aes(x = Remote, y = CareerSatisfaction)) +
+    geom_boxplot() +
+    labs(x = NULL,
+         y = "Career Sattisfaction")
+
+```
+
+## Create training and test sets
+
+```{r}
+## Remove the Respondent column
+
+stackoverflow1 <- select(stackoverflow, -Respondent)
+
+## convert the Remote variable to a 0-1 variable
+
+stackoverflow2 <- mutate(stackoverflow1, Remote = ifelse(Remote == "Remote", 1,0))
+
+## Create training and test sets (in a 80:20 ratio)
+
+# Split the data into training and testing sets
+set.seed(1234)
+library(rsample)
+stack_split <- initial_split(stackoverflow2, prop = 0.8)
+
+stack_train <- training(stack_split)
+stack_test <- testing(stack_split)
+```
+
+## Fit a simple model
+
+### Build a simple logistic regression model
+
+```{r}
+
+simple_glm <- glm(Remote~., family = "binomial", data = stack_train)
+simple_glm
+summary(simple_glm)
+
+
+#CountryIndia, CountryUnitedStates, Salary , YearsCodedJob, OpenSourceTRUE, 
+#CompanySizeNumber, CareerSatisfaction, Database administrator`TRUE, 
+#Desktop applications developer`TRUE are significant.
+
+
+#The logistic regression coefficients give the change in the log odds of the outcome 
+#for a one unit increase in the predictor variable.
+
+#For a one unit increase in salary, the change in log odds of developers more likely 
+#to work remotely increases by 0.000004632 holding all other variables constant.
+
+#For a one unit increase in CompanySizeNumber, the change in log odds of developers more 
+#likely to work remotely decreases by 0.00006976 holding all other variables constant.
+
+#The log odds of being a Database administrator likely to work remotely is 0.3070 
+#higher than the log odds of not being a Database administrator holding all other 
+#variables constant.
+
+#The log odds of being a Desktop applications developer likely to work remotely is 0.3062 
+#lower than the log odds of not being a Desktop applications developer holding all other 
+#variables constant.
+
+```
+
+### confidence intervals for the coefficient & odds Ratio
+
+```{r}
+### CIs using profiled log-likelihood
+confint(simple_glm)
+
+### CIs using standard errors
+confint.default(simple_glm)
+
+###exponentiate the coefficients and interpret them as odds-ratios
+## odds ratios only
+exp(coef(simple_glm))
+
+#column-wise.
+## odds ratios and 95% CI
+exp(cbind(OR = coef(simple_glm), confint(simple_glm)))
+
+
+#For every one unit increase in Salary, the odds of developers more likely 
+#to work remotely increases by a factor of 1.00000463 holding all other variables 
+#constant.
+
+
+#For every one unit increase in CompanySizeNumber, the odds of developers more likely 
+#to work remotely decreases by a factor of 0.99993024 holding all other variables 
+#constant.
+
+
+#The odds of being a Database administrator likely to work remotely is 1.35933849 times 
+#the odds of not being a Database administrator holding all other variables constant.
+
+
+#The odds of being a Desktop applications developer likely to work remotely is 0.73626227 
+#times the odds of not being a Desktop applications developer holding all other variables
+#constant.
+
+```
+
+### Assessing the model
+
+```{r}
+#We may also wish to see measures of how well our model fits. This can be particularly
+#useful when comparing competing models.
+
+#The output produced by summary(simple_glm) included indices of fit, including 
+#the null and deviance residuals and the AIC.
+
+#One measure of model fit is the significance of the overall model. This test asks
+#whether the model with predictors fits significantly better than a model with just an
+#intercept (i.e., a null model).
+
+#The test statistic is the difference between the residual deviance for the model
+#with predictors and the null model. The test statistic is distributed chi-squared
+#with degrees of freedom equal to the differences in degrees of freedom between the
+#current and the null model (i.e., the number of predictor variables in the model).
+
+
+#To find the difference in deviance for the two models (i.e., the test statistic),
+#we use the command:
+with(simple_glm, null.deviance - deviance)
+
+#The degrees of freedom for the difference between the two models is equal to the number of
+#predictor variables in the model, and can be obtained using:
+with(simple_glm, df.null - df.residual)
+
+#the p-value can be obtained using:
+with(simple_glm, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+
+#To see the model’s log likelihood, we type:
+logLik(simple_glm)
+
+#(The Residual deviance is -2*log likelihood)
+#-2*-1710.67=3421.34
+
+
+#The chi-square of 274.8713 with 23 degrees of freedom and an associated p-value of less
+#than 0.001 (5.26266e-45) tells us that our model as a whole fits significantly better
+#than an empty model. This is sometimes called a likelihood ratio test.
+```
+
+### Removing unsignificant variables from the model
+
+```{r}
+
+simple_glm1 <- glm(Remote~. - Hobby - `Data scientist`-
+                     `Developer with stats/math background` - DevOps -
+                     `Embedded developer` - `Graphic designer` -
+                     `Graphics programming` - `Machine learning specialist` -
+                     `Mobile developer` - `Quality assurance engineer` -
+                     `Systems administrator` - `Web developer` , family = "binomial",
+                   data = stack_train)
+simple_glm1
+summary(simple_glm1)
+```
+
+### Predicting the model
+
+```{r}
+
+#Add the prediction as a column to the training set
+stack_train$Predictsimple_glm <- predict(simple_glm, newdata = stack_train,
+                                     type = "response")
+
+stack_train$Predictsimple_glm1 <- predict(simple_glm1, newdata = stack_train,
+                                     type = "response")
+
+```
+
+### Visualising model predicted values
+
+```{r}
+ggplot(stack_train, aes(x = Predictsimple_glm)) + 
+  geom_histogram(fill = "skyblue", colour = "black") + facet_wrap(~Remote, ncol = 1, 
+                                scales = "free_y")
+
+
+ggplot(stack_train, aes(x = Predictsimple_glm1)) + 
+  geom_histogram(fill = "magenta", colour = "grey") + facet_wrap(~Remote, ncol = 1, 
+                                scales = "free_y")
+
+ggplot(stack_train, aes(x = Predictsimple_glm)) + 
+  geom_density(colour = "red") + facet_wrap(~Remote, ncol = 1, 
+                                scales = "free_y")
+
+ggplot(stack_train, aes(x = Predictsimple_glm1)) + 
+  geom_density(colour = "green") + facet_wrap(~Remote, ncol = 1, 
+                                scales = "free_y")
+
+```
+
+## A decision tree version
+
+```{r}
+stack_train2 <- training(stack_split)
+
+library(rpart)
+simple_tree <- rpart(Remote~., data = stack_train2)
+
+simple_tree
+
+library(rpart.plot)
+
+rpart.plot(simple_tree)
+```
 
 
 
